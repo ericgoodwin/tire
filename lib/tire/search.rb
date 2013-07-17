@@ -13,10 +13,11 @@ module Tire
         else
           @indices = Array(indices)
         end
-        @types   = Array(options.delete(:type)).map { |type| Utils.escape(type) }
-        @options = options
+        @raw_query = options.delete(:raw_query)
+        @types     = Array(options.delete(:type)).map { |type| Utils.escape(type) }
+        @options   = options
 
-        @path    = ['/', @indices.join(','), @types.join(','), '_search'].compact.join('/').squeeze('/')
+        @path      = ['/', @indices.join(','), @types.join(','), '_search'].compact.join('/').squeeze('/')
 
         block.arity < 1 ? instance_eval(&block) : block.call(self) if block_given?
       end
@@ -174,7 +175,7 @@ module Tire
       end
 
       def to_json(options={})
-        payload = to_hash
+        payload = @raw_query || to_hash
         # TODO: Remove when deprecated interface is removed
         if payload.is_a?(String)
           payload
